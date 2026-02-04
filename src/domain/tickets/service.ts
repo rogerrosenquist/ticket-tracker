@@ -49,4 +49,13 @@ export class TicketService {
 
     return { status: 'success', data: ticket };
   }
+
+  // Fetch ALL tickets for the dashboard
+  async getTickets(): Promise<Result<Ticket[]>> {
+    // Simulate network delay
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    
+    // Return the whole array
+    return { status: 'success', data: this.db };
+  }
 }
