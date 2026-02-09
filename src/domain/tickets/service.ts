@@ -80,21 +80,23 @@ export class TicketService {
       return { status: 'error', error: 'Ticket not found' };
     }
 
+    const existingTicket = tickets[index];
+
     // Merge existing ticket with new data
-    // We purposefully exclude 'id' and 'createdAt' to prevent tampering
     const updatedTicket = {
-      ...tickets[index],
+      ...existingTicket,
       ...input,
-      updatedAt: new Date(), // Good practice to track edit times
+      // FIX: Manually convert the JSON string back to a real Date object
+      createdAt: new Date(existingTicket.createdAt),
+      updatedAt: new Date(), 
     };
 
-    // Validate the result to ensure we didn't break the schema
+    // Now Zod will be happy because createdAt is a Date object
     const validation = TicketSchema.safeParse(updatedTicket);
     if (!validation.success) {
       return { status: 'error', error: validation.error.issues[0].message };
     }
 
-    // Save
     tickets[index] = updatedTicket;
     await this.writeDb(tickets);
 
