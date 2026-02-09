@@ -40,3 +40,33 @@ export async function createTicketAction(formData: FormData) {
   revalidatePath('/');
   redirect('/');
 }
+
+export async function updateTicketAction(id: string, formData: FormData) {
+  // Extract data
+  const rawData = {
+    title: formData.get('title'),
+    description: formData.get('description'),
+    priority: formData.get('priority'),
+    status: formData.get('status'), // We allow editing status now
+  };
+
+  // Validate (Allow partial updates if needed, but here we expect a full form)
+  const validation = TicketSchema.pick({
+    title: true,
+    description: true,
+    priority: true,
+    status: true,
+  }).safeParse(rawData);
+
+  if (!validation.success) {
+    throw new Error('Validation Failed');
+  }
+
+  // Call Service
+  await ticketService.updateTicket(id, validation.data);
+
+  // Revalidate & Redirect
+  revalidatePath(`/tickets/${id}`); // Refresh the details page
+  revalidatePath('/');              // Refresh the dashboard
+  redirect(`/tickets/${id}`);       // Go back to the details view
+}

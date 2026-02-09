@@ -70,4 +70,34 @@ export class TicketService {
 
     return { status: 'success', data: validTicket };
   }
+
+  // --- FEATURE 4: UPDATE ---
+  async updateTicket(id: string, input: Partial<Ticket>): Promise<Result<Ticket>> {
+    const tickets = await this.readDb();
+    const index = tickets.findIndex((t) => t.id === id);
+
+    if (index === -1) {
+      return { status: 'error', error: 'Ticket not found' };
+    }
+
+    // Merge existing ticket with new data
+    // We purposefully exclude 'id' and 'createdAt' to prevent tampering
+    const updatedTicket = {
+      ...tickets[index],
+      ...input,
+      updatedAt: new Date(), // Good practice to track edit times
+    };
+
+    // Validate the result to ensure we didn't break the schema
+    const validation = TicketSchema.safeParse(updatedTicket);
+    if (!validation.success) {
+      return { status: 'error', error: validation.error.issues[0].message };
+    }
+
+    // Save
+    tickets[index] = updatedTicket;
+    await this.writeDb(tickets);
+
+    return { status: 'success', data: updatedTicket };
+  }
 }
