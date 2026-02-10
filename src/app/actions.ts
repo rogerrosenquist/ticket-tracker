@@ -70,3 +70,17 @@ export async function updateTicketAction(id: string, formData: FormData) {
   revalidatePath('/');              // Refresh the dashboard
   redirect(`/tickets/${id}`);       // Go back to the details view
 }
+
+export async function deleteTicketAction(id: string) {
+  // Call Service
+  const result = await ticketService.deleteTicket(id);
+
+  if (result.status === 'error') {
+    throw new Error(result.error);
+  }
+
+  // Revalidate & Redirect
+  // We are going back to the dashboard, so we must refresh it
+  revalidatePath('/');
+  redirect('/');
+}

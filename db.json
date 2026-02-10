@@ -1,11 +1,10 @@
 [
   {
-    "id": "5d89a1bb-470d-45aa-aa0d-06e429043d3d",
+    "id": "7d54a942-bf3b-4978-8b5e-d106c29151b5",
     "title": "Test ticket",
-    "description": "Wow ten char cool EDIT",
+    "description": "Crazy cool wowie wow",
     "status": "open",
-    "priority": "high",
-    "createdAt": "2026-02-06T13:59:42.942Z",
-    "updatedAt": "2026-02-09T14:11:55.981Z"
+    "priority": "medium",
+    "createdAt": "2026-02-10T13:11:11.573Z"
   }
 ]

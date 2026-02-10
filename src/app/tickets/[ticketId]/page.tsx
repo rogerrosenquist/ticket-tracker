@@ -1,18 +1,20 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { ticketService } from '@/domain/tickets/instance';
+import { deleteTicketAction } from '@/app/actions';
 
 interface TicketPageProps {
+  // In Next.js 15+, params is a Promise
   params: Promise<{
     ticketId: string;
   }>;
 }
 
 export default async function TicketDetailsPage({ params }: TicketPageProps) {
-  // AWAIT the params (Next.js 15 Requirement)
+  // Await params to get the ID string
   const { ticketId } = await params;
 
-  // Fetch data
+  // Fetch the ticket
   const result = await ticketService.getTicket(ticketId);
 
   if (result.status === 'error') {
@@ -24,7 +26,7 @@ export default async function TicketDetailsPage({ params }: TicketPageProps) {
   // Render
   return (
     <main className="mx-auto max-w-3xl px-4 py-8">
-      {/* Breadcrumb / Back Navigation */}
+      {/* Breadcrumb / Back Link */}
       <div className="mb-6 flex items-center justify-between">
         <Link 
           href="/" 
@@ -47,13 +49,26 @@ export default async function TicketDetailsPage({ params }: TicketPageProps) {
               </span>
             </div>
 
-            {/* NEW: Edit Button */}
-            <Link
-              href={`/tickets/${ticketId}/edit`}
-              className="rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
-            >
-              Edit Ticket
-            </Link>
+            {/* ACTION BUTTONS */}
+            <div className="flex items-center gap-2">
+              {/* Edit Button */}
+              <Link
+                href={`/tickets/${ticketId}/edit`}
+                className="rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+              >
+                Edit
+              </Link>
+
+              {/* Delete Button (Must be a Form) */}
+              <form action={deleteTicketAction.bind(null, ticket.id as string)}>
+                <button
+                  type="submit"
+                  className="rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500"
+                >
+                  Delete
+                </button>
+              </form>
+            </div>
           </div>
           
           <h1 className="mt-2 text-2xl font-bold text-gray-900">{ticket.title}</h1>

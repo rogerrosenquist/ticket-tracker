@@ -102,4 +102,23 @@ export class TicketService {
 
     return { status: 'success', data: updatedTicket };
   }
+
+  // --- FEATURE 5: DELETE ---
+  async deleteTicket(id: string): Promise<Result<void>> {
+    const tickets = await this.readDb();
+    
+    // Check if it exists first
+    const exists = tickets.some((t) => t.id === id);
+    if (!exists) {
+      return { status: 'error', error: 'Ticket not found' };
+    }
+
+    // Filter out the ticket
+    const newTickets = tickets.filter((t) => t.id !== id);
+    
+    // Save
+    await this.writeDb(newTickets);
+    
+    return { status: 'success', data: undefined };
+  }
 }
