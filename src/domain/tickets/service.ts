@@ -27,8 +27,19 @@ export class TicketService {
   }
 
   // --- FEATURE 1: GET ALL ---
-  async getTickets(): Promise<Result<Ticket[]>> {
-    const tickets = await this.readDb();
+  // Update the signature to accept a query string
+  async getTickets(query?: string): Promise<Result<Ticket[]>> {
+    let tickets = await this.readDb();
+
+    // If a query exists, filter the list
+    if (query) {
+      const lowerQuery = query.toLowerCase();
+      tickets = tickets.filter((t) => 
+        t.title.toLowerCase().includes(lowerQuery) || 
+        t.description.toLowerCase().includes(lowerQuery)
+      );
+    }
+
     return { status: 'success', data: tickets };
   }
 
@@ -121,4 +132,6 @@ export class TicketService {
     
     return { status: 'success', data: undefined };
   }
+
+  
 }
