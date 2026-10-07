@@ -1,7 +1,7 @@
 import fs from 'fs/promises';
 import path from 'path';
 import { randomUUID } from 'crypto';
-import type { Result, Ticket } from '@/lib/types'; // Adjust if your types are elsewhere
+import type { CreateTicketInput, Result, Ticket } from '@/lib/types'; // Adjust if your types are elsewhere
 import { TicketSchema } from '@/lib/types';       // Adjust if needed
 
 // Locate the file safely
@@ -56,7 +56,7 @@ export class TicketService {
   }
 
   // --- FEATURE 3: CREATE ---
-  async createTicket(input: any): Promise<Result<Ticket>> {
+  async createTicket(input: CreateTicketInput): Promise<Result<Ticket>> {
     // 1. Prepare
     const newTicketCandidate = {
       ...input,
