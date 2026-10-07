@@ -6,23 +6,17 @@ import { Header } from '@/components/layout/header';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Ticket Tracker',
-  description: 'A capstone project',
+  title: { default: 'TicketTracker', template: '%s | TicketTracker' },
+  description: 'A clear view of your tickets, priorities, and progress.',
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <body className={`${inter.className} min-h-screen bg-gray-50 text-gray-900 antialiased`}>
-        {/* The Header lives outside the page content */}
+      <body className={inter.className}>
+        <a href="#main-content" className="skip-link">Skip to content</a>
         <Header />
-        
-        {/* The "children" is where page.tsx renders */}
-        {children}
+        <div className="app-content">{children}</div>
       </body>
     </html>
   );

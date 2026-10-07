@@ -1,26 +1,12 @@
+import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ticketService } from '@/domain/tickets/instance';
 import { TicketForm } from '@/components/tickets/TicketForm';
+import { Icon } from '@/components/ui/Icon';
 
-interface EditPageProps {
-  params: Promise<{ ticketId: string }>;
-}
-
-export default async function EditTicketPage({ params }: EditPageProps) {
+export default async function EditTicketPage({ params }: { params: Promise<{ ticketId: string }> }) {
   const { ticketId } = await params;
   const result = await ticketService.getTicket(ticketId);
-
-  if (result.status === 'error') {
-    notFound();
-  }
-
-  return (
-    <main className="mx-auto max-w-2xl px-4 py-8">
-      <h1 className="mb-8 text-2xl font-bold text-gray-900">Edit Ticket</h1>
-      <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-        {/* Pass the existing ticket to the form to enable "Edit Mode" */}
-        <TicketForm ticket={result.data} />
-      </div>
-    </main>
-  );
+  if (result.status === 'error') notFound();
+  return <main id="main-content" className="page"><div className="page-topbar"><span>Workspace <span className="breadcrumb-divider">/</span> Tickets <span className="breadcrumb-divider">/</span> <strong>Edit ticket</strong></span></div><div className="form-page"><Link href={`/tickets/${ticketId}`} className="back-link"><Icon name="back" size={16} />Back to ticket</Link><div className="page-heading"><div><p className="eyebrow">KEEP THINGS MOVING</p><h1>Edit ticket<span className="heading-dot">.</span></h1><p className="page-description">Refine the details. Update the progress. Take the next step.</p></div></div><div className="form-panel"><TicketForm ticket={result.data} /></div><p className="form-footnote">Fields marked with * are required.</p></div></main>;
 }

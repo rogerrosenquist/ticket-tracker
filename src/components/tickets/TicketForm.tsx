@@ -1,89 +1,35 @@
 'use client';
 
+import Link from 'next/link';
+import { useActionState, useState } from 'react';
 import { createTicketAction, updateTicketAction } from '@/app/actions';
-import type { Ticket } from '@/lib/types';
+import type { Ticket, TicketFormState } from '@/lib/types';
+import { Icon } from '@/components/ui/Icon';
 
-interface TicketFormProps {
-  // If provided, we are in "Edit Mode". If missing, "Create Mode".
-  ticket?: Ticket; 
-}
-
-export function TicketForm({ ticket }: TicketFormProps) {
-  // Decide which action to use
-  // If editing, we bind the ID to the update action so the server knows WHICH ticket to update
-  const action = ticket 
-    ? updateTicketAction.bind(null, ticket.id as string) 
-    : createTicketAction;
+export function TicketForm({ ticket }: { ticket?: Ticket }) {
+  const [title, setTitle] = useState(ticket?.title ?? '');
+  const [description, setDescription] = useState(ticket?.description ?? '');
+  const [priority, setPriority] = useState<string>(ticket?.priority ?? 'medium');
+  const [status, setStatus] = useState<string>(ticket?.status ?? 'open');
+  const [state, action, isPending] = useActionState(
+    async (_previousState: TicketFormState, formData: FormData): Promise<TicketFormState> => {
+      if (ticket) return updateTicketAction(ticket.id as string, formData);
+      await createTicketAction(formData);
+      return null;
+    },
+    null,
+  );
 
   return (
-    <form action={action} className="space-y-6">
-      
-      {/* Title */}
-      <div>
-        <label htmlFor="title" className="block text-sm font-medium text-gray-700">Title</label>
-        <input
-          type="text"
-          name="title"
-          id="title"
-          required
-          defaultValue={ticket?.title} // Pre-fill if editing
-          className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
-        />
-      </div>
-
-      {/* Description */}
-      <div>
-        <label htmlFor="description" className="block text-sm font-medium text-gray-700">Description</label>
-        <textarea
-          name="description"
-          id="description"
-          rows={4}
-          required
-          defaultValue={ticket?.description} // Pre-fill
-          className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
-        />
-      </div>
-
-      {/* Priority */}
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label htmlFor="priority" className="block text-sm font-medium text-gray-700">Priority</label>
-          <select
-            name="priority"
-            id="priority"
-            defaultValue={ticket?.priority || 'medium'}
-            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
-          >
-            <option value="low">Low</option>
-            <option value="medium">Medium</option>
-            <option value="high">High</option>
-          </select>
-        </div>
-
-        {/* Status - Only show if editing */}
-        {ticket && (
-          <div>
-            <label htmlFor="status" className="block text-sm font-medium text-gray-700">Status</label>
-            <select
-              name="status"
-              id="status"
-              defaultValue={ticket.status}
-              className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
-            >
-              <option value="open">Open</option>
-              <option value="in-progress">In Progress</option>
-              <option value="closed">Closed</option>
-            </select>
-          </div>
-        )}
-      </div>
-
-      <button
-        type="submit"
-        className="flex w-full justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-      >
-        {ticket ? 'Update Ticket' : 'Create Ticket'}
-      </button>
+    <form action={action} className="ticket-form">
+      <div className="form-section-title"><span className="section-number">01</span><div><h2>Ticket details</h2><p>Give the task a name and a little context.</p></div></div>
+      <div className="field-group"><label htmlFor="title" className="required-label">Title</label><input type="text" name="title" id="title" required value={title} onChange={event => setTitle(event.target.value)} placeholder="What needs to get done?" aria-describedby="title-hint" /><p id="title-hint" className="field-hint">Keep it clear and specific. At least 3 characters.</p></div>
+      <div className="field-group"><label htmlFor="description" className="required-label">Description</label><textarea name="description" id="description" rows={6} required value={description} onChange={event => setDescription(event.target.value)} placeholder="Add context, steps to reproduce, or what a good outcome looks like..." aria-describedby="description-hint" /><p id="description-hint" className="field-hint">A little detail helps. At least 10 characters.</p></div>
+      <div className="form-divider" />
+      <div className="form-section-title"><span className="section-number">02</span><div><h2>Organization</h2><p>Set the priority{ticket ? ' and current status' : ' so you know where to start'}.</p></div></div>
+      <div className="form-columns"><div className="field-group"><label htmlFor="priority">Priority</label><select name="priority" id="priority" value={priority} onChange={event => setPriority(event.target.value)}><option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option></select><p className="field-hint">How soon does this need attention?</p></div>{ticket ? <div className="field-group"><label htmlFor="status">Status</label><select name="status" id="status" value={status} onChange={event => setStatus(event.target.value)}><option value="open">Open</option><option value="in-progress">In Progress</option><option value="closed">Closed</option></select><p className="field-hint">Where does the work stand?</p></div> : <div className="new-ticket-note"><span className="badge-dot" /><p>Start with an open ticket.<small>You can update its status as work moves forward.</small></p></div>}</div>
+      {state && <div role="alert" className="form-error"><Icon name="alert" size={18} /><span>{state.error}</span></div>}
+      <div className="form-actions"><Link href={ticket ? `/tickets/${ticket.id}` : '/'} className="button button-secondary">Cancel</Link><button disabled={isPending} type="submit" className="button button-primary"><Icon name={ticket ? 'check' : 'plus'} size={18} />{isPending ? 'Saving...' : ticket ? 'Update Ticket' : 'Create Ticket'}</button></div>
     </form>
   );
 }

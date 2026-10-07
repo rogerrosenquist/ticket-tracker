@@ -1,45 +1,16 @@
-import Link from 'next/link'; 
+import Link from 'next/link';
 import type { ReadonlyTicket } from '@/lib/types';
+import { Icon } from '@/components/ui/Icon';
+import { PriorityBadge, StatusBadge } from './TicketBadge';
 
-interface TicketCardProps {
-  ticket: ReadonlyTicket;
-}
-
-export function TicketCard({ ticket }: TicketCardProps) {
-  // Colors for tickets
-  const priorityColors = {
-    low: 'bg-blue-100 text-blue-800',
-    medium: 'bg-yellow-100 text-yellow-800',
-    high: 'bg-red-100 text-red-800',
-  };
-  const statusColors = {
-    open: 'bg-green-100 text-green-800',
-    'in-progress': 'bg-purple-100 text-purple-800',
-    closed: 'bg-gray-100 text-gray-800',
-  };
-
+export function TicketCard({ ticket }: { ticket: ReadonlyTicket }) {
+  const created = new Date(ticket.createdAt);
   return (
-    // WRAP the card in a Link
-    <Link href={`/tickets/${ticket.id}`} className="block group">
-      <div className="h-full rounded-lg border border-gray-200 bg-white p-6 shadow-sm transition group-hover:shadow-md group-hover:border-indigo-200">
-        <div className="flex items-start justify-between">
-          <h3 className="text-lg font-medium text-gray-900 group-hover:text-indigo-600">
-            {ticket.title}
-          </h3>
-          <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${priorityColors[ticket.priority]}`}>
-            {ticket.priority}
-          </span>
-        </div>
-        <p className="mt-2 text-sm text-gray-500 line-clamp-2">
-          {ticket.description}
-        </p>
-        <div className="mt-4 flex items-center justify-between text-xs text-gray-400">
-          <span className={`rounded px-2 py-1 font-medium ${statusColors[ticket.status]}`}>
-            {ticket.status.replace('-', ' ')}
-          </span>
-          <time>{new Date(ticket.createdAt).toLocaleDateString()}</time>
-        </div>
-      </div>
+    <Link href={`/tickets/${ticket.id}`} className="ticket-card">
+      <div className="ticket-card-top"><span className="ticket-reference">#{ticket.id?.slice(0, 8).toUpperCase()}</span><PriorityBadge priority={ticket.priority} /></div>
+      <h3>{ticket.title}</h3>
+      <p className="ticket-excerpt">{ticket.description}</p>
+      <div className="ticket-card-bottom"><StatusBadge status={ticket.status} /><span className="ticket-date"><time dateTime={created.toISOString()}>{created.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</time><Icon name="arrow" size={16} /></span></div>
     </Link>
   );
 }

@@ -30,3 +30,4 @@ export type ReadonlyTicket = Readonly<Ticket>;
 export type Result<T> = 
   | { status: 'success'; data: T }
   | { status: 'error'; error: string };
+export type TicketFormState = { error: string } | null;

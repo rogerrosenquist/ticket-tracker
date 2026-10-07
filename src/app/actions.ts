@@ -3,7 +3,7 @@
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { ticketService } from '@/domain/tickets/instance';
-import { TicketSchema } from '@/lib/types'; 
+import { TicketSchema, type TicketFormState } from '@/lib/types';
 
 export async function createTicketAction(formData: FormData) {
   // Extract data from the native FormData object
@@ -41,7 +41,7 @@ export async function createTicketAction(formData: FormData) {
   redirect('/');
 }
 
-export async function updateTicketAction(id: string, formData: FormData) {
+export async function updateTicketAction(id: string, formData: FormData): Promise<TicketFormState> {
   // Extract data
   const rawData = {
     title: formData.get('title'),
@@ -59,11 +59,19 @@ export async function updateTicketAction(id: string, formData: FormData) {
   }).safeParse(rawData);
 
   if (!validation.success) {
-    throw new Error('Validation Failed');
+    return { error: validation.error.issues[0].message };
   }
 
-  // Call Service
-  await ticketService.updateTicket(id, validation.data);
+  // Report failures to the form before revalidating or redirecting.
+  try {
+    const result = await ticketService.updateTicket(id, validation.data);
+    if (result.status === 'error') {
+      return { error: result.error };
+    }
+  } catch (error) {
+    console.error('Failed to update ticket:', error);
+    return { error: 'Unable to update the ticket. Please try again.' };
+  }
 
   // Revalidate & Redirect
   revalidatePath(`/tickets/${id}`); // Refresh the details page

@@ -21,6 +21,6 @@ describe('Header Component', () => {
     const ticketsLink = screen.getByRole('link', { name: /tickets/i });
 
     expect(dashboardLink).toBeDefined();
-    expect(ticketsLink).toBeDefined();
+    expect(ticketsLink.getAttribute('href')).toBe('/');
   });
 });
